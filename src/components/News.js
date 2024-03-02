@@ -1,19 +1,28 @@
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useContext } from 'react'
 import NewsItem from './NewsItem'
 import Spinner from './Spinner'
 import InfiniteScroll from 'react-infinite-scroll-component'
 
 import PropTypes from 'prop-types'
+import newsContext from './context/news/newsContext'
 
 const News = (props) => {
-  const [articles, setArticles] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [page, setPage] = useState(1)
-  const [totalResults, setTotalResults] = useState(0)
+  const context = useContext(newsContext)
+  let {
+    country,
+    articles,
+    setArticles,
+    loading,
+    setLoading,
+    page,
+    setPage,
+    totalResults,
+    setTotalResults,
+  } = context
 
   const updateNews = async () => {
     props.setProgress(0)
-    const url = `https://newsapi.org/v2/top-headlines?country=${props.country}&category=${props.category}&apiKey=33b70fb38f5a4726bd1776102276f6a0&page=${page}&pageSize=${props.pageSize}`
+    const url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${props.category}&apiKey=33b70fb38f5a4726bd1776102276f6a0&page=${page}&pageSize=${props.pageSize}`
     setLoading(true)
     props.setProgress(30)
     let data = await fetch(url)
@@ -32,17 +41,16 @@ const News = (props) => {
       props.category[0].toUpperCase() + props.category.substring(1)
     }`
     updateNews()
-  }, [])
+  }, [country])
 
   const fetchMoreData = async () => {
     props.setProgress(0)
-    let url = `https://newsapi.org/v2/top-headlines?country=${
-      props.country
-    }&category=${props.category}&apiKey=33b70fb38f5a4726bd1776102276f6a0&page=${
-      page + 1
-    }&pageSize=${props.pageSize}`
+    let url = `https://newsapi.org/v2/top-headlines?country=${country}&category=${
+      props.category
+    }&apiKey=33b70fb38f5a4726bd1776102276f6a0&page=${page + 1}&pageSize=${
+      props.pageSize
+    }`
     setPage(page + 1)
-    // setLoading(true)
     props.setProgress(30)
     let data = await fetch(url)
     props.setProgress(60)
@@ -51,7 +59,6 @@ const News = (props) => {
 
     setArticles(articles.concat(parsedData.articles))
     setTotalResults(parsedData.totalResults)
-    // setLoading(false)
     props.setProgress(100)
   }
 
